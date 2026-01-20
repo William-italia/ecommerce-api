@@ -1,0 +1,49 @@
+-- falta o frete, decidir onde por
+
+CREATE TABLE products (
+    id SERIAL PRIMARY KEY,
+    name VARCHAR(255) NOT NULL,
+    description TEXT,
+    features TEXT,
+    box_items JSON,            -- Itens da caixa: [{"quantity":1,"item":"Headphone Unit"}, ...]
+    price DECIMAL(10,2) NOT NULL,
+    stock INT DEFAULT 0,         -- Estoque disponível
+    main_image VARCHAR(255),
+    gallery_images JSON           -- Galeria de imagens: ["img1.png","img2.jpeg"]
+);
+
+CREATE TABLE customers (
+    id SERIAL PRIMARY KEY,
+    name VARCHAR(255) NOT NULL,
+    email VARCHAR(255) UNIQUE NOT NULL,
+    phone_number VARCHAR(20)
+);
+
+CREATE TABLE cart (
+    id SERIAL PRIMARY KEY,
+    -- customer_id INT NOT NULL REFERENCES customers(id) ON DELETE CASCADE, talvez seja inutil
+    product_id INT NOT NULL REFERENCES products(id) ON DELETE CASCADE,
+    quantity INT NOT NULL DEFAULT 1
+);
+
+CREATE TABLE invoices (
+    id SERIAL PRIMARY KEY,
+    customer_id INT NOT NULL REFERENCES customers(id) ON DELETE CASCADE,
+    total DECIMAL(10,2) NOT NULL,
+    accessToken TEXT UNIQUE,
+        address VARCHAR(255),
+    postal_code VARCHAR(20),
+    city VARCHAR(100),
+    country VARCHAR(100),
+    status VARCHAR(50) DEFAULT 'pending',  -- pending, paid, shipped, cancelled
+    payment_id VARCHAR(255),               -- ID do gateway de pagamento
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE TABLE invoice_items (
+    id SERIAL PRIMARY KEY,
+    invoice_id INT NOT NULL REFERENCES invoices(id) ON DELETE CASCADE,
+    product_id INT NOT NULL REFERENCES products(id) ON DELETE CASCADE,
+    quantity INT NOT NULL DEFAULT 1,
+    price DECIMAL(10,2) NOT NULL           -- Preço unitário no momento da compra
+);
