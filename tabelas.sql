@@ -1,15 +1,14 @@
--- falta o frete, decidir onde por
 
 CREATE TABLE products (
     id SERIAL PRIMARY KEY,
     name VARCHAR(255) NOT NULL,
     description TEXT,
     features TEXT,
-    box_items JSON,            -- Itens da caixa: [{"quantity":1,"item":"Headphone Unit"}, ...]
+    boxItems JSON,            -- Itens da caixa: [{"quantity":1,"item":"Headphone Unit"}, ...]
     price DECIMAL(10,2) NOT NULL,
     stock INT DEFAULT 0,         -- Estoque disponível
     main_image VARCHAR(255),
-    gallery_images JSON           -- Galeria de imagens: ["img1.png","img2.jpeg"]
+    galleryImages JSON           -- Galeria de imagens: ["img1.png","img2.jpeg"]
 );
 
 CREATE TABLE customers (
@@ -21,7 +20,6 @@ CREATE TABLE customers (
 
 CREATE TABLE cart (
     id SERIAL PRIMARY KEY,
-    -- customer_id INT NOT NULL REFERENCES customers(id) ON DELETE CASCADE, talvez seja inutil
     product_id INT NOT NULL REFERENCES products(id) ON DELETE CASCADE,
     quantity INT NOT NULL DEFAULT 1
 );
@@ -29,8 +27,9 @@ CREATE TABLE cart (
 CREATE TABLE invoices (
     id SERIAL PRIMARY KEY,
     customer_id INT NOT NULL REFERENCES customers(id) ON DELETE CASCADE,
-    total DECIMAL(10,2) NOT NULL,
-    accessToken TEXT UNIQUE,
+    amount DECIMAL(10,2) NOT NULL, -- total
+    freight DECIMAL NOT NULL, -- Frete
+    accessToken TEXT UNIQUE NOT NULL,
         address VARCHAR(255),
     postal_code VARCHAR(20),
     city VARCHAR(100),
