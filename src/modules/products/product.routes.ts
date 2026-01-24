@@ -7,7 +7,7 @@ import {
   createProduct,
   updateProduct,
   removeProduct,
-} from './product.controller';
+} from './product.controller.js';
 
 router.get('/', getProducts);
 router.get('/:id', getProduct);

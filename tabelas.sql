@@ -7,7 +7,7 @@ CREATE TABLE products (
     boxItems JSON,            -- Itens da caixa: [{"quantity":1,"item":"Headphone Unit"}, ...]
     price DECIMAL(10,2) NOT NULL,
     stock INT DEFAULT 0,         -- Estoque disponível
-    main_image VARCHAR(255),
+    mainImage VARCHAR(255),
     galleryImages JSON           -- Galeria de imagens: ["img1.png","img2.jpeg"]
 );
 
