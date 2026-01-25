@@ -11,6 +11,7 @@ CREATE TABLE products (
     galleryImages JSON           -- Galeria de imagens: ["img1.png","img2.jpeg"]
 );
 
+-- CUSTOMERS
 CREATE TABLE customers (
     id SERIAL PRIMARY KEY,
     name VARCHAR(255) NOT NULL,
@@ -18,12 +19,14 @@ CREATE TABLE customers (
     phone_number VARCHAR(20)
 );
 
+-- CART
 CREATE TABLE cart (
     id SERIAL PRIMARY KEY,
     product_id INT NOT NULL REFERENCES products(id) ON DELETE CASCADE,
     quantity INT NOT NULL DEFAULT 1
 );
 
+-- INVOICES
 CREATE TABLE invoices (
     id SERIAL PRIMARY KEY,
     customer_id INT NOT NULL REFERENCES customers(id) ON DELETE CASCADE,
@@ -34,15 +37,16 @@ CREATE TABLE invoices (
     postal_code VARCHAR(20),
     city VARCHAR(100),
     country VARCHAR(100),
-    status VARCHAR(50) DEFAULT 'pending',  -- pending, paid, shipped, cancelled
-    payment_id VARCHAR(255),               -- ID do gateway de pagamento
+    status VARCHAR(50) DEFAULT 'pending',
+    payment_id VARCHAR(255),
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
+-- INVOICE ITEMS
 CREATE TABLE invoice_items (
     id SERIAL PRIMARY KEY,
     invoice_id INT NOT NULL REFERENCES invoices(id) ON DELETE CASCADE,
     product_id INT NOT NULL REFERENCES products(id) ON DELETE CASCADE,
     quantity INT NOT NULL DEFAULT 1,
-    price DECIMAL(10,2) NOT NULL           -- Preço unitário no momento da compra
+    price DECIMAL(10,2) NOT NULL
 );
