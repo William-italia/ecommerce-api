@@ -1,4 +1,3 @@
-import { mock } from 'node:test';
 import { ProductRepository } from './product.repository';
 import { ProductService } from './product.service';
 
