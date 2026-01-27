@@ -1,6 +1,6 @@
 import { Request, Response } from 'express';
 import { Product, CreateProductDTO } from './product.types';
-// import { ProductService } from './product.service';
+import { ProductService } from './product.service';
 
 export class ProductController {
   async getAll(req: Request, res: Response) {}
