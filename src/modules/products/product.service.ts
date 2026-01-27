@@ -8,38 +8,41 @@ import {
 export class ProductService {
   constructor(private repo: ProductRepository) {}
 
-  async getAll(): Promise<Product[]> {
+  async listProducts(): Promise<Product[]> {
     return this.repo.getAll();
   }
 
-  async getByID(id: number): Promise<Product | null> {
-    if (id <= 0) throw new Error('Id inválido');
+  async getProduct(id: number): Promise<Product | null> {
+    if (id <= 0 || id === null) throw new Error('Id inválido');
 
     const product = await this.repo.getById(id);
 
     return product;
   }
 
-  async create(data: CreateProductDTO): Promise<Product> {
+  async createProduct(data: CreateProductDTO): Promise<Product> {
     validateCreateProduct(data);
 
     const product = await this.repo.create(data);
     return product;
   }
 
-  async update(id: number, data: UpdateProductDTO): Promise<Product | null> {
+  async updateProduct(
+    id: number,
+    data: UpdateProductDTO
+  ): Promise<Product | null> {
     validateUpdateProduct(id, data);
 
     const existing = await this.repo.getById(id);
 
-    if (!existing) return null;
+    if (!existing) throw new Error('Produto Não existe');
 
     const updateProduct = await this.repo.updateById(id, data);
 
     return updateProduct;
   }
 
-  async remove(id: number): Promise<Product | null> {
+  async removeProduct(id: number): Promise<Product | null> {
     if (id <= 0) throw new Error('Id inválido');
 
     const product = await this.repo.deleteById(id);
