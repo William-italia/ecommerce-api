@@ -1,9 +1,6 @@
 import { ProductRepository } from './product.repository';
 import { Product, CreateProductDTO, UpdateProductDTO } from './product.types';
-import {
-  validateUpdateProduct,
-  validateCreateProduct,
-} from './validators/product.validator';
+import { AppError } from '../../shared/errors/AppError';
 
 export class ProductService {
   constructor(private repo: ProductRepository) {}
@@ -13,17 +10,16 @@ export class ProductService {
   }
 
   async getProduct(id: number): Promise<Product | null> {
-    if (id <= 0) throw new Error('Id inválido');
-
     const product = await this.repo.getById(id);
-
-    if (!product) throw new Error('Produto não existe');
+    if (!product) throw new AppError('Produto não existe', 404);
 
     return product;
   }
 
   async createProduct(data: CreateProductDTO): Promise<Product> {
-    validateCreateProduct(data);
+    const existing = await this.repo.getByName(data.name);
+
+    if (existing) throw new AppError('Produto Já existe', 409);
 
     const product = await this.repo.create(data);
     return product;
@@ -33,22 +29,19 @@ export class ProductService {
     id: number,
     data: UpdateProductDTO
   ): Promise<Product | null> {
-    validateUpdateProduct(id, data);
-
     const existing = await this.repo.getById(id);
 
-    if (!existing) throw new Error('Produto não existe');
+    if (!existing) throw new AppError('Produto não existe', 404);
 
-    const updateProduct = await this.repo.updateById(id, data);
+    const updatedProduct = await this.repo.updateById(id, data);
 
-    return updateProduct;
+    return updatedProduct;
   }
 
-  async removeProduct(id: number): Promise<Product | null> {
-    if (id <= 0) throw new Error('Id inválido');
-
+  async removeProduct(id: number) {
     const existing = await this.repo.getById(id);
-    if (!existing) throw new Error('Produto não existe');
+
+    if (!existing) throw new AppError('Produto não encontrado', 404);
 
     const product = await this.repo.deleteById(id);
 

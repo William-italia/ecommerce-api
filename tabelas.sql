@@ -1,15 +1,17 @@
-
 CREATE TABLE products (
-    id SERIAL PRIMARY KEY,
-    name VARCHAR(255) NOT NULL,
-    description TEXT,
-    features TEXT,
-    boxItems JSON,            -- Itens da caixa: [{"quantity":1,"item":"Headphone Unit"}, ...]
-    price DECIMAL(10,2) NOT NULL,
-    stock INT DEFAULT 0,         -- Estoque disponível
-    mainImage VARCHAR(255),
-    galleryImages JSON           -- Galeria de imagens: ["img1.png","img2.jpeg"]
+  id SERIAL PRIMARY KEY,
+  name VARCHAR(255) NOT NULL,
+  description TEXT,
+  features TEXT,
+  box_items JSONB,
+  price NUMERIC(10,2) NOT NULL,
+  stock INT DEFAULT 0,
+  main_image VARCHAR(255),
+  gallery_images JSONB,
+  created_at TIMESTAMP DEFAULT NOW(),
+  updated_at TIMESTAMP DEFAULT NOW()
 );
+
 
 -- CUSTOMERS
 CREATE TABLE customers (

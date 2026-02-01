@@ -1,7 +1,5 @@
-import { json } from 'node:stream/consumers';
 import { pool } from '../../config/db';
 import { Product, CreateProductDTO, UpdateProductDTO } from './product.types';
-import { parseProductJSON } from '../../shared/utils/parseProduct.utils';
 
 export class ProductRepository {
   async getAll(): Promise<Product[]> {
@@ -16,20 +14,31 @@ export class ProductRepository {
 
     if (result.rowCount === 0) return null;
 
-    return parseProductJSON(result.rows[0] as Product);
+    return result.rows[0] as Product;
   }
+
+  async getByName(name: string): Promise<Product | null> {
+    const result = await pool.query('SELECT * FROM products WHERE name = $1', [
+      name,
+    ]);
+
+    if (result.rowCount === 0) return null;
+    return result.rows[0] as Product;
+  }
+
   async create(data: CreateProductDTO): Promise<Product> {
     const result = await pool.query(
-      'INSERT INTO products(name, description, features, boxItems, price, stock, mainImage, galleryImages) VALUES ($1, $2, $3, $4, $5, $6, $7, $8) RETURNING *',
+      'INSERT INTO products(name, description, features, box_items, price, stock, main_image, gallery_images, category) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9) RETURNING *',
       [
         data.name,
         data.description,
-        data.features,
-        JSON.stringify(data.boxItems),
+        JSON.stringify(data.features),
+        JSON.stringify(data.box_items),
         data.price,
         data.stock,
-        data.mainImage,
-        JSON.stringify(data.galleryImages),
+        data.main_image,
+        JSON.stringify(data.gallery_images),
+        data.category,
       ]
     );
     return result.rows[0] as Product;
@@ -40,7 +49,7 @@ export class ProductRepository {
     data: UpdateProductDTO
   ): Promise<Product | null> {
     const fields: string[] = [];
-    const values: any[] = [];
+    const values: unknown[] = [];
 
     let idx = 1;
 
@@ -56,9 +65,9 @@ export class ProductRepository {
       fields.push(`features=$${idx++}`);
       values.push(data.features);
     }
-    if (data.boxItems !== undefined) {
-      fields.push(`boxItems=$${idx++}`);
-      values.push(JSON.stringify(data.boxItems));
+    if (data.box_items !== undefined) {
+      fields.push(`box_items=$${idx++}`);
+      values.push(JSON.stringify(data.box_items));
     }
     if (data.price !== undefined) {
       fields.push(`price=$${idx++}`);
@@ -68,13 +77,17 @@ export class ProductRepository {
       fields.push(`stock=$${idx++}`);
       values.push(data.stock);
     }
-    if (data.mainImage !== undefined) {
-      fields.push(`mainImage=$${idx++}`);
-      values.push(data.mainImage);
+    if (data.main_image !== undefined) {
+      fields.push(`main_image=$${idx++}`);
+      values.push(data.main_image);
     }
-    if (data.galleryImages !== undefined) {
-      fields.push(`galleryImages=$${idx++}`);
-      values.push(JSON.stringify(data.galleryImages));
+    if (data.gallery_images !== undefined) {
+      fields.push(`gallery_images=$${idx++}`);
+      values.push(JSON.stringify(data.gallery_images));
+    }
+    if (data.category !== undefined) {
+      fields.push(`category=${idx++}`);
+      values.push(data.category);
     }
 
     if (fields.length === 0) return null;
@@ -90,7 +103,7 @@ export class ProductRepository {
 
     if (result.rowCount === 0) return null;
 
-    return parseProductJSON(result.rows[0] as Product);
+    return result.rows[0] as Product;
   }
 
   async deleteById(id: number): Promise<Product | null> {
