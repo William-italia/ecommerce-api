@@ -9,6 +9,27 @@ export class ProductService {
     return this.repo.getAll();
   }
 
+  async listProductsByCategory(category: string): Promise<Product[] | null> {
+    const products = await this.repo.getByCategory(category);
+
+    if (!products)
+      throw new AppError(
+        `Não há nenhum produto nesta categoria ${category}`,
+        404
+      );
+
+    return products;
+  }
+
+  async listRecommended(id: number, limit: number): Promise<Product[] | null> {
+    const products = await this.repo.getRecommended(id, limit);
+
+    if (!products)
+      throw new AppError(`Não há nenhum produto recomendado!`, 404);
+
+    return products;
+  }
+
   async getProduct(id: number): Promise<Product | null> {
     const product = await this.repo.getById(id);
     if (!product) throw new AppError('Produto não existe', 404);

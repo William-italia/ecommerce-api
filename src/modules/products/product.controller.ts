@@ -2,10 +2,13 @@ import { Request, Response } from 'express';
 import { ProductService } from './product.service';
 import {
   productIdParamSchema,
+  productCategoryParamSchema,
   createProductSchema,
   updateProductSchema,
+  querySchema,
 } from './product.schema';
 import { handleError } from '../../shared/errors/handleError';
+import { AppError } from '../../shared/errors/AppError';
 
 export class ProductController {
   constructor(private service: ProductService) {}
@@ -31,6 +34,29 @@ export class ProductController {
     }
   };
 
+  getRecommended = async (req: Request, res: Response) => {
+    try {
+      const { exclude, limit } = querySchema.parse(req.query);
+      const products = await this.service.listRecommended(exclude, limit);
+
+      return res.status(200).json(products);
+    } catch (error: unknown) {
+      return handleError(res, error);
+    }
+  };
+
+  getProductByCategory = async (req: Request, res: Response) => {
+    try {
+      const { category } = productCategoryParamSchema.parse(req.params);
+
+      const products = await this.service.listProductsByCategory(category);
+
+      return res.status(200).json({ category: category, products });
+    } catch (error: unknown) {
+      return handleError(res, error);
+    }
+  };
+
   createProduct = async (req: Request, res: Response) => {
     try {
       const data = createProductSchema.parse(req.body);
@@ -49,7 +75,9 @@ export class ProductController {
 
       const product = await this.service.updateProduct(id, data);
 
-      return res.status(200).json(product);
+      return res
+        .status(200)
+        .json({ message: 'Produto atualizado com sucesso', product });
     } catch (error: unknown) {
       return handleError(res, error);
     }

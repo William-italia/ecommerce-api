@@ -79,15 +79,16 @@ describe('ProductService', () => {
       const data = {
         name: 'Produto Teste',
         description: 'Meu Produto',
-        features: 'Mais texto',
-        boxItems: [
+        features: ['Mais texto'],
+        box_items: [
           { quantidade: 1, item: 'Caixa' },
           { quantidade: 3, item: 'Caixa2' },
         ],
         price: 150,
         stock: 4,
-        mainImage: 'url_da_imagem',
-        galleryImages: ['url_da_imagem1', 'url_da_imagem2'],
+        main_image: 'url_da_imagem',
+        gallery_images: ['url_da_imagem1', 'url_da_imagem2'],
+        category: 'text',
       };
 
       mockRepo.create.mockResolvedValue(data);

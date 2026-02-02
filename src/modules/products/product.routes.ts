@@ -9,8 +9,10 @@ const productRepository = new ProductRepository();
 const productService = new ProductService(productRepository);
 const productController = new ProductController(productService);
 
+router.get('/recommended', productController.getRecommended);
 router.get('/', productController.getProducts);
 router.get('/:id', productController.getProduct);
+router.get('/category/:category', productController.getProductByCategory);
 router.post('/', productController.createProduct);
 router.put('/:id', productController.updateProduct);
 router.delete('/:id', productController.removeProduct);

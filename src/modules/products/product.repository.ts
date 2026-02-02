@@ -26,6 +26,31 @@ export class ProductRepository {
     return result.rows[0] as Product;
   }
 
+  async getByCategory(category: string): Promise<Product[] | null> {
+    const result = await pool.query(
+      'SELECT id, name, description, main_image FROM products WHERE category = $1',
+      [category]
+    );
+
+    if (result.rowCount === 0) return null;
+
+    return result.rows as Product[];
+  }
+
+  async getRecommended(
+    exclude: number,
+    limit: number
+  ): Promise<Product[] | null> {
+    const result = await pool.query(
+      'SELECT id, name FROM products WHERE id != $1 ORDER BY RANDOM() LIMIT $2',
+      [exclude, limit]
+    );
+
+    if (result.rowCount === 0) return null;
+
+    return result.rows as Product[];
+  }
+
   async create(data: CreateProductDTO): Promise<Product> {
     const result = await pool.query(
       'INSERT INTO products(name, description, features, box_items, price, stock, main_image, gallery_images, category) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9) RETURNING *',
@@ -86,7 +111,7 @@ export class ProductRepository {
       values.push(JSON.stringify(data.gallery_images));
     }
     if (data.category !== undefined) {
-      fields.push(`category=${idx++}`);
+      fields.push(`category=$${idx++}`);
       values.push(data.category);
     }
 

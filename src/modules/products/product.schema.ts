@@ -1,8 +1,17 @@
 import { z } from 'zod';
 
 // params
+export const querySchema = z.object({
+  exclude: z.coerce.number().int().positive(),
+  limit: z.coerce.number().int().positive(),
+});
+
 export const productIdParamSchema = z.object({
   id: z.coerce.number().int().positive(),
+});
+
+export const productCategoryParamSchema = z.object({
+  category: z.coerce.string(),
 });
 
 export const BoxItemSchema = z.object({
