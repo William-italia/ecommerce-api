@@ -17,7 +17,7 @@ export class ProductController {
     try {
       const products = await this.service.listProducts();
 
-      res.status(200).json(products);
+      res.status(200).json({ products });
     } catch (error: unknown) {
       return handleError(res, error);
     }
@@ -28,7 +28,7 @@ export class ProductController {
       const { id } = productIdParamSchema.parse(req.params);
       const product = await this.service.getProduct(id);
 
-      return res.status(200).json(product);
+      return res.status(200).json({ product });
     } catch (error: unknown) {
       return handleError(res, error);
     }
@@ -39,7 +39,7 @@ export class ProductController {
       const { exclude, limit } = querySchema.parse(req.query);
       const products = await this.service.listRecommended(exclude, limit);
 
-      return res.status(200).json(products);
+      return res.status(200).json({ products });
     } catch (error: unknown) {
       return handleError(res, error);
     }
@@ -62,7 +62,7 @@ export class ProductController {
       const data = createProductSchema.parse(req.body);
       const product = await this.service.createProduct(data);
 
-      return res.status(201).json(product);
+      return res.status(201).json({ product });
     } catch (error) {
       return handleError(res, error);
     }

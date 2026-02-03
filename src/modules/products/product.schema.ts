@@ -3,7 +3,7 @@ import { z } from 'zod';
 // params
 export const querySchema = z.object({
   exclude: z.coerce.number().int().positive(),
-  limit: z.coerce.number().int().positive(),
+  limit: z.coerce.number().int().positive().default(3),
 });
 
 export const productIdParamSchema = z.object({

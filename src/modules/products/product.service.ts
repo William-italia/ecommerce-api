@@ -30,15 +30,16 @@ export class ProductService {
     return products;
   }
 
-  async getProduct(id: number): Promise<Product | null> {
+  async getProduct(id: number): Promise<Product> {
     const product = await this.repo.getById(id);
+
     if (!product) throw new AppError('Produto não existe', 404);
 
     return product;
   }
 
   async createProduct(data: CreateProductDTO): Promise<Product> {
-    const existing = await this.repo.getByName(data.name);
+    let existing = await this.repo.getByName(data.name);
 
     if (existing) throw new AppError('Produto Já existe', 409);
 

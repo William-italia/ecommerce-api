@@ -26,27 +26,24 @@ export class ProductRepository {
     return result.rows[0] as Product;
   }
 
-  async getByCategory(category: string): Promise<Product[] | null> {
+  async getByCategory(category: string): Promise<Product[]> {
     const result = await pool.query(
       'SELECT id, name, description, main_image FROM products WHERE category = $1',
       [category]
     );
 
-    if (result.rowCount === 0) return null;
+    if (result.rowCount === 0) return [];
 
     return result.rows as Product[];
   }
 
-  async getRecommended(
-    exclude: number,
-    limit: number
-  ): Promise<Product[] | null> {
+  async getRecommended(exclude: number, limit: number): Promise<Product[]> {
     const result = await pool.query(
       'SELECT id, name FROM products WHERE id != $1 ORDER BY RANDOM() LIMIT $2',
       [exclude, limit]
     );
 
-    if (result.rowCount === 0) return null;
+    if (result.rowCount === 0) return [];
 
     return result.rows as Product[];
   }
@@ -88,7 +85,7 @@ export class ProductRepository {
     }
     if (data.features !== undefined) {
       fields.push(`features=$${idx++}`);
-      values.push(data.features);
+      values.push(JSON.stringify(data.features));
     }
     if (data.box_items !== undefined) {
       fields.push(`box_items=$${idx++}`);
