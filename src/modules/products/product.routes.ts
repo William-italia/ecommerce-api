@@ -10,8 +10,8 @@ const productService = new ProductService(productRepository);
 const productController = new ProductController(productService);
 
 router.get('/', productController.getProducts);
-router.get('/recommended', productController.getRecommended);
-router.get('/category/:category', productController.getProductByCategory);
+router.get('/recommended', productController.getRecommendedProducts);
+router.get('/category/:category', productController.getProductsByCategory);
 router.get('/:id', productController.getProduct);
 router.post('/', productController.createProduct);
 router.put('/:id', productController.updateProduct);

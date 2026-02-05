@@ -5,7 +5,7 @@ import {
   productCategoryParamSchema,
   createProductSchema,
   updateProductSchema,
-  querySchema,
+  recommendQuerySchema,
 } from './product.schema';
 import { handleError } from '../../shared/errors/handleError';
 
@@ -33,10 +33,13 @@ export class ProductController {
     }
   };
 
-  getRecommended = async (req: Request, res: Response) => {
+  getRecommendedProducts = async (req: Request, res: Response) => {
     try {
-      const { exclude, limit } = querySchema.parse(req.query);
-      const products = await this.service.listRecommended(exclude, limit);
+      const { exclude, limit } = recommendQuerySchema.parse(req.query);
+      const products = await this.service.listRecommendedProducts(
+        exclude,
+        limit
+      );
 
       return res.status(200).json({ products });
     } catch (error: unknown) {
@@ -44,7 +47,7 @@ export class ProductController {
     }
   };
 
-  getProductByCategory = async (req: Request, res: Response) => {
+  getProductsByCategory = async (req: Request, res: Response) => {
     try {
       const { category } = productCategoryParamSchema.parse(req.params);
 

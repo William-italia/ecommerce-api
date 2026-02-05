@@ -1,36 +1,50 @@
 import { pool } from '../../config/db';
+import { z } from 'zod';
+
 import {
   ProductDTO,
+  RecommendedProductDTO,
+  CategoryProductDTO,
   CreateProductDTO,
   UpdateProductDTO,
 } from './product.types';
 
-export class ProductRepository {
-  async getAll(): Promise<ProductDTO[]> {
-    const result = await pool.query('SELECT * FROM products');
-    return result.rows as ProductDTO[];
-  }
+import {
+  CategoryProductResponseSchema,
+  productResponseSchema,
+  RecommendedProductResponseSchema,
+} from './product.schema';
 
-  async getById(id: number): Promise<ProductDTO | null> {
+import { ProductMapper } from './product.mapper';
+
+export class ProductRepository {
+  //
+  async getAllProducts(): Promise<ProductDTO[]> {
+    const result = await pool.query('SELECT * FROM products');
+
+    return result.rows.map(row => productResponseSchema.parse(row));
+  }
+  //
+  async getProductById(id: number): Promise<ProductDTO | null> {
     const result = await pool.query('SELECT * FROM products WHERE id = $1', [
       id,
     ]);
 
     if (result.rowCount === 0) return null;
 
-    return result.rows[0] as ProductDTO;
+    return productResponseSchema.parse(ProductMapper.toDTO(result.rows[0]));
   }
 
-  async getByName(name: string): Promise<ProductDTO | null> {
-    const result = await pool.query('SELECT * FROM products WHERE name = $1', [
-      name,
-    ]);
+  async existsByName(name: string): Promise<boolean | null> {
+    const result = await pool.query(
+      'SELECT name FROM products WHERE name = $1',
+      [name]
+    );
 
-    if (result.rowCount === 0) return null;
-    return result.rows[0] as ProductDTO;
+    return result.rowCount !== null && result.rowCount > 0;
   }
 
-  async getByCategory(category: string): Promise<ProductDTO[]> {
+  async getProductsByCategory(category: string): Promise<CategoryProductDTO[]> {
     const result = await pool.query(
       'SELECT id, name, description, main_image FROM products WHERE category = $1',
       [category]
@@ -38,10 +52,15 @@ export class ProductRepository {
 
     if (result.rowCount === 0) return [];
 
-    return result.rows as ProductDTO[];
+    return result.rows.map(row =>
+      CategoryProductResponseSchema.parse(ProductMapper.toCategoryDTO(row))
+    );
   }
 
-  async getRecommended(exclude: number, limit: number): Promise<ProductDTO[]> {
+  async getRecommendedProducts(
+    exclude: number,
+    limit: number
+  ): Promise<RecommendedProductDTO[]> {
     const result = await pool.query(
       'SELECT id, name FROM products WHERE id != $1 ORDER BY RANDOM() LIMIT $2',
       [exclude, limit]
@@ -49,10 +68,12 @@ export class ProductRepository {
 
     if (result.rowCount === 0) return [];
 
-    return result.rows as ProductDTO[];
+    return result.rows.map(row =>
+      RecommendedProductResponseSchema.parse(ProductMapper.toCategoryDTO(row))
+    );
   }
 
-  async create(data: CreateProductDTO): Promise<ProductDTO> {
+  async createProduct(data: CreateProductDTO): Promise<ProductDTO> {
     const result = await pool.query(
       'INSERT INTO products(name, description, features, box_items, price, stock, main_image, gallery_images, category) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9) RETURNING *',
       [
@@ -67,10 +88,10 @@ export class ProductRepository {
         data.category,
       ]
     );
-    return result.rows[0] as ProductDTO;
+    return productResponseSchema.parse(ProductMapper.toDTO(result.rows[0]));
   }
 
-  async updateById(
+  async updateProductById(
     id: number,
     data: UpdateProductDTO
   ): Promise<ProductDTO | null> {
@@ -129,10 +150,10 @@ export class ProductRepository {
 
     if (result.rowCount === 0) return null;
 
-    return result.rows[0] as ProductDTO;
+    return productResponseSchema.parse(ProductMapper.toDTO(result.rows[0]));
   }
 
-  async deleteById(id: number): Promise<ProductDTO | null> {
+  async deleteProductById(id: number): Promise<ProductDTO | null> {
     const result = await pool.query(
       'DELETE FROM products WHERE id=$1 RETURNING *',
       [id]
@@ -140,6 +161,6 @@ export class ProductRepository {
 
     if (result.rowCount === 0) return null;
 
-    return result.rows[0] as ProductDTO;
+    return productResponseSchema.parse(ProductMapper.toDTO(result.rows[0]));
   }
 }
