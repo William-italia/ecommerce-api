@@ -1,15 +1,19 @@
 import { ProductRepository } from './product.repository';
-import { Product, CreateProductDTO, UpdateProductDTO } from './product.types';
+import {
+  ProductDTO,
+  CreateProductDTO,
+  UpdateProductDTO,
+} from './product.schema';
 import { AppError } from '../../shared/errors/AppError';
 
 export class ProductService {
   constructor(private repo: ProductRepository) {}
 
-  async listProducts(): Promise<Product[]> {
+  async listProducts(): Promise<ProductDTO[]> {
     return this.repo.getAll();
   }
 
-  async listProductsByCategory(category: string): Promise<Product[] | null> {
+  async listProductsByCategory(category: string): Promise<ProductDTO[] | null> {
     const products = await this.repo.getByCategory(category);
 
     if (!products)
@@ -21,7 +25,10 @@ export class ProductService {
     return products;
   }
 
-  async listRecommended(id: number, limit: number): Promise<Product[] | null> {
+  async listRecommended(
+    id: number,
+    limit: number
+  ): Promise<ProductDTO[] | null> {
     const products = await this.repo.getRecommended(id, limit);
 
     if (!products)
@@ -30,7 +37,7 @@ export class ProductService {
     return products;
   }
 
-  async getProduct(id: number): Promise<Product> {
+  async getProduct(id: number): Promise<ProductDTO> {
     const product = await this.repo.getById(id);
 
     if (!product) throw new AppError('Produto não existe', 404);
@@ -38,7 +45,7 @@ export class ProductService {
     return product;
   }
 
-  async createProduct(data: CreateProductDTO): Promise<Product> {
+  async createProduct(data: CreateProductDTO): Promise<ProductDTO> {
     let existing = await this.repo.getByName(data.name);
 
     if (existing) throw new AppError('Produto Já existe', 409);
@@ -50,7 +57,7 @@ export class ProductService {
   async updateProduct(
     id: number,
     data: UpdateProductDTO
-  ): Promise<Product | null> {
+  ): Promise<ProductDTO | null> {
     const existing = await this.repo.getById(id);
 
     if (!existing) throw new AppError('Produto não existe', 404);

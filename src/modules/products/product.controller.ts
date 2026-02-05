@@ -8,7 +8,6 @@ import {
   querySchema,
 } from './product.schema';
 import { handleError } from '../../shared/errors/handleError';
-import { AppError } from '../../shared/errors/AppError';
 
 export class ProductController {
   constructor(private service: ProductService) {}

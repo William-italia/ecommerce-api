@@ -1,32 +1,36 @@
 import { pool } from '../../config/db';
-import { Product, CreateProductDTO, UpdateProductDTO } from './product.types';
+import {
+  ProductDTO,
+  CreateProductDTO,
+  UpdateProductDTO,
+} from './product.schema';
 
 export class ProductRepository {
-  async getAll(): Promise<Product[]> {
+  async getAll(): Promise<ProductDTO[]> {
     const result = await pool.query('SELECT * FROM products');
-    return result.rows as Product[];
+    return result.rows as ProductDTO[];
   }
 
-  async getById(id: number): Promise<Product | null> {
+  async getById(id: number): Promise<ProductDTO | null> {
     const result = await pool.query('SELECT * FROM products WHERE id = $1', [
       id,
     ]);
 
     if (result.rowCount === 0) return null;
 
-    return result.rows[0] as Product;
+    return result.rows[0] as ProductDTO;
   }
 
-  async getByName(name: string): Promise<Product | null> {
+  async getByName(name: string): Promise<ProductDTO | null> {
     const result = await pool.query('SELECT * FROM products WHERE name = $1', [
       name,
     ]);
 
     if (result.rowCount === 0) return null;
-    return result.rows[0] as Product;
+    return result.rows[0] as ProductDTO;
   }
 
-  async getByCategory(category: string): Promise<Product[]> {
+  async getByCategory(category: string): Promise<ProductDTO[]> {
     const result = await pool.query(
       'SELECT id, name, description, main_image FROM products WHERE category = $1',
       [category]
@@ -34,10 +38,10 @@ export class ProductRepository {
 
     if (result.rowCount === 0) return [];
 
-    return result.rows as Product[];
+    return result.rows as ProductDTO[];
   }
 
-  async getRecommended(exclude: number, limit: number): Promise<Product[]> {
+  async getRecommended(exclude: number, limit: number): Promise<ProductDTO[]> {
     const result = await pool.query(
       'SELECT id, name FROM products WHERE id != $1 ORDER BY RANDOM() LIMIT $2',
       [exclude, limit]
@@ -45,10 +49,10 @@ export class ProductRepository {
 
     if (result.rowCount === 0) return [];
 
-    return result.rows as Product[];
+    return result.rows as ProductDTO[];
   }
 
-  async create(data: CreateProductDTO): Promise<Product> {
+  async create(data: CreateProductDTO): Promise<ProductDTO> {
     const result = await pool.query(
       'INSERT INTO products(name, description, features, box_items, price, stock, main_image, gallery_images, category) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9) RETURNING *',
       [
@@ -63,13 +67,13 @@ export class ProductRepository {
         data.category,
       ]
     );
-    return result.rows[0] as Product;
+    return result.rows[0] as ProductDTO;
   }
 
   async updateById(
     id: number,
     data: UpdateProductDTO
-  ): Promise<Product | null> {
+  ): Promise<ProductDTO | null> {
     const fields: string[] = [];
     const values: unknown[] = [];
 
@@ -125,10 +129,10 @@ export class ProductRepository {
 
     if (result.rowCount === 0) return null;
 
-    return result.rows[0] as Product;
+    return result.rows[0] as ProductDTO;
   }
 
-  async deleteById(id: number): Promise<Product | null> {
+  async deleteById(id: number): Promise<ProductDTO | null> {
     const result = await pool.query(
       'DELETE FROM products WHERE id=$1 RETURNING *',
       [id]
@@ -136,6 +140,6 @@ export class ProductRepository {
 
     if (result.rowCount === 0) return null;
 
-    return result.rows[0] as Product;
+    return result.rows[0] as ProductDTO;
   }
 }
