@@ -34,8 +34,6 @@ export const productResponseSchema = z.object({
   category: z.string(),
 });
 
-export type ProductDTO = z.infer<typeof productResponseSchema>;
-
 // body
 export const createProductSchema = z.object({
   name: z.string().min(3),
@@ -49,13 +47,9 @@ export const createProductSchema = z.object({
   category: z.string(),
 });
 
-export type CreateProductDTO = z.infer<typeof createProductSchema>;
-
 // update
 export const updateProductSchema = createProductSchema
   .partial()
   .refine(data => Object.keys(data).length > 0, {
     message: 'Envie ao menos um campo para atualizar',
   });
-
-export type UpdateProductDTO = z.infer<typeof updateProductSchema>;

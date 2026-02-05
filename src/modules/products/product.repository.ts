@@ -3,7 +3,7 @@ import {
   ProductDTO,
   CreateProductDTO,
   UpdateProductDTO,
-} from './product.schema';
+} from './product.types';
 
 export class ProductRepository {
   async getAll(): Promise<ProductDTO[]> {

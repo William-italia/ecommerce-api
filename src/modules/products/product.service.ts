@@ -3,7 +3,7 @@ import {
   ProductDTO,
   CreateProductDTO,
   UpdateProductDTO,
-} from './product.schema';
+} from './product.types';
 import { AppError } from '../../shared/errors/AppError';
 
 export class ProductService {
