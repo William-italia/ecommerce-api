@@ -20,10 +20,9 @@ export class ProductService {
   ): Promise<CategoryProductDTO[] | null> {
     const products = await this.repo.getProductsByCategory(category);
 
-    if (!products)
-      throw new AppError(
-        `Não há nenhum produto nesta categoria ${category}`,
-        404
+    if (products.length === 0)
+      throw AppError.notFound(
+        'Não há nenhum produto nesta categoria: ' + category
       );
 
     return products;
@@ -35,8 +34,8 @@ export class ProductService {
   ): Promise<RecommendedProductDTO[] | null> {
     const products = await this.repo.getRecommendedProducts(id, limit);
 
-    if (!products)
-      throw new AppError(`Não há nenhum produto recomendado!`, 404);
+    if (products.length === 0)
+      throw AppError.notFound('Não foi possivel encontrar nenhum produto');
 
     return products;
   }
@@ -44,14 +43,14 @@ export class ProductService {
   async getProduct(id: number): Promise<ProductDTO> {
     const product = await this.repo.getProductById(id);
 
-    if (!product) throw new AppError('Produto não existe', 404);
+    if (!product) throw AppError.notFound('Produto não encontrado');
 
     return product;
   }
 
   async createProduct(data: CreateProductDTO): Promise<ProductDTO> {
     if (await this.repo.existsByName(data.name)) {
-      throw new AppError('Produto Já existe', 409);
+      throw AppError.conflict('Já existe um produto com esse nome');
     }
 
     const product = await this.repo.createProduct(data);
@@ -65,7 +64,7 @@ export class ProductService {
     // pensar mais
     const existing = await this.repo.getProductById(id);
 
-    if (!existing) throw new AppError('Produto não existe', 404);
+    if (!existing) throw AppError.notFound('Produto não encontrado');
 
     const updatedProduct = await this.repo.updateProductById(id, data);
 
@@ -75,7 +74,7 @@ export class ProductService {
   async removeProduct(id: number) {
     const existing = await this.repo.getProductById(id);
 
-    if (!existing) throw new AppError('Produto não encontrado', 404);
+    if (!existing) throw AppError.notFound('Produto não encontrado');
 
     const product = await this.repo.deleteProductById(id);
 
