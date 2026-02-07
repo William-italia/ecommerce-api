@@ -1,5 +1,5 @@
-import { pool } from '../../config/db';
-import { z } from 'zod';
+import { pool } from "../../config/db";
+import { z } from "zod";
 
 import {
   ProductDTO,
@@ -7,26 +7,26 @@ import {
   CategoryProductDTO,
   CreateProductDTO,
   UpdateProductDTO,
-} from './product.types';
+} from "./product.types";
 
 import {
   CategoryProductResponseSchema,
   productResponseSchema,
   RecommendedProductResponseSchema,
-} from './product.schema';
+} from "./product.schema";
 
-import { ProductMapper } from './product.mapper';
+import { ProductMapper } from "./product.mapper";
 
 export class ProductRepository {
   //
   async getAllProducts(): Promise<ProductDTO[]> {
-    const result = await pool.query('SELECT * FROM products');
+    const result = await pool.query("SELECT * FROM products");
 
-    return result.rows.map(row => productResponseSchema.parse(row));
+    return result.rows.map((row) => productResponseSchema.parse(row));
   }
   //
   async getProductById(id: number): Promise<ProductDTO | null> {
-    const result = await pool.query('SELECT * FROM products WHERE id = $1', [
+    const result = await pool.query("SELECT * FROM products WHERE id = $1", [
       id,
     ]);
 
@@ -37,8 +37,8 @@ export class ProductRepository {
 
   async existsByName(name: string): Promise<boolean | null> {
     const result = await pool.query(
-      'SELECT name FROM products WHERE name = $1',
-      [name]
+      "SELECT name FROM products WHERE name = $1",
+      [name],
     );
 
     return result.rowCount !== null && result.rowCount > 0;
@@ -46,36 +46,36 @@ export class ProductRepository {
 
   async getProductsByCategory(category: string): Promise<CategoryProductDTO[]> {
     const result = await pool.query(
-      'SELECT id, name, description, main_image FROM products WHERE category = $1 ORDER BY position ASC',
-      [category]
+      "SELECT id, name, description, main_image FROM products WHERE category = $1 ORDER BY position ASC",
+      [category],
     );
 
     if (result.rowCount === 0) return [];
 
-    return result.rows.map(row =>
-      CategoryProductResponseSchema.parse(ProductMapper.toCategoryDTO(row))
+    return result.rows.map((row) =>
+      CategoryProductResponseSchema.parse(ProductMapper.toCategoryDTO(row)),
     );
   }
 
   async getRecommendedProducts(
     exclude: number,
-    limit: number
+    limit: number,
   ): Promise<RecommendedProductDTO[]> {
     const result = await pool.query(
-      'SELECT id, name FROM products WHERE id != $1 ORDER BY RANDOM() LIMIT $2',
-      [exclude, limit]
+      "SELECT id, name FROM products WHERE id != $1 ORDER BY RANDOM() LIMIT $2",
+      [exclude, limit],
     );
 
     if (result.rowCount === 0) return [];
 
-    return result.rows.map(row =>
-      RecommendedProductResponseSchema.parse(ProductMapper.toCategoryDTO(row))
+    return result.rows.map((row) =>
+      RecommendedProductResponseSchema.parse(ProductMapper.toCategoryDTO(row)),
     );
   }
 
   async createProduct(data: CreateProductDTO): Promise<ProductDTO> {
     const result = await pool.query(
-      'INSERT INTO products(name, description, features, box_items, price, stock, main_image, gallery_images, category, position) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10) RETURNING *',
+      "INSERT INTO products(name, description, features, box_items, price, stock, main_image, gallery_images, category, position) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10) RETURNING *",
       [
         data.name,
         data.description,
@@ -87,14 +87,14 @@ export class ProductRepository {
         JSON.stringify(data.gallery_images),
         data.category,
         data.position,
-      ]
+      ],
     );
     return productResponseSchema.parse(ProductMapper.toDTO(result.rows[0]));
   }
 
   async updateProductById(
     id: number,
-    data: UpdateProductDTO
+    data: UpdateProductDTO,
   ): Promise<ProductDTO | null> {
     const fields: string[] = [];
     const values: unknown[] = [];
@@ -147,7 +147,7 @@ export class ProductRepository {
 
     const query = `
       UPDATE products
-      SET ${fields.join(', ')}
+      SET ${fields.join(", ")}
       WHERE id = $${idx}
       RETURNING *
     `;
@@ -161,8 +161,8 @@ export class ProductRepository {
 
   async deleteProductById(id: number): Promise<ProductDTO | null> {
     const result = await pool.query(
-      'DELETE FROM products WHERE id=$1 RETURNING *',
-      [id]
+      "DELETE FROM products WHERE id=$1 RETURNING *",
+      [id],
     );
 
     if (result.rowCount === 0) return null;
