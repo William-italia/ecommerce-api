@@ -46,7 +46,7 @@ export class ProductRepository {
 
   async getProductsByCategory(category: string): Promise<CategoryProductDTO[]> {
     const result = await pool.query(
-      'SELECT id, name, description, main_image FROM products WHERE category = $1',
+      'SELECT id, name, description, main_image FROM products WHERE category = $1 ORDER BY position ASC',
       [category]
     );
 
@@ -75,7 +75,7 @@ export class ProductRepository {
 
   async createProduct(data: CreateProductDTO): Promise<ProductDTO> {
     const result = await pool.query(
-      'INSERT INTO products(name, description, features, box_items, price, stock, main_image, gallery_images, category) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9) RETURNING *',
+      'INSERT INTO products(name, description, features, box_items, price, stock, main_image, gallery_images, category, position) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10) RETURNING *',
       [
         data.name,
         data.description,
@@ -86,6 +86,7 @@ export class ProductRepository {
         data.main_image,
         JSON.stringify(data.gallery_images),
         data.category,
+        data.position,
       ]
     );
     return productResponseSchema.parse(ProductMapper.toDTO(result.rows[0]));
@@ -135,6 +136,11 @@ export class ProductRepository {
     if (data.category !== undefined) {
       fields.push(`category=$${idx++}`);
       values.push(data.category);
+    }
+
+    if (data.position !== undefined) {
+      fields.push(`position=$${idx++}`);
+      values.push(data.position);
     }
 
     if (fields.length === 0) return null;

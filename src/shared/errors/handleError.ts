@@ -2,7 +2,7 @@ import { Response } from 'express';
 import { ZodError } from 'zod';
 import { AppError } from './AppError';
 
-export function handleError(res: Response, error: any) {
+export function handleError(res: Response, error: unknown) {
   if (error instanceof ZodError) {
     return res.status(400).json({
       message: 'Dados Inválidos',
@@ -16,7 +16,7 @@ export function handleError(res: Response, error: any) {
     });
   }
 
-  console.log(error);
+  console.error('[UNEXPECTED ERROR]', error);
 
   return res.status(500).json({
     message: 'Erro interno do servidor',

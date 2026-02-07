@@ -1,8 +1,8 @@
-import { z } from 'zod';
+import { positive, z } from 'zod';
 
 // params
 export const recommendQuerySchema = z.object({
-  exclude: z.coerce.number().int().positive(),
+  exclude: z.coerce.number().int().positive().default(0),
   limit: z.coerce.number().int().positive().default(3),
 });
 
@@ -54,6 +54,7 @@ export const createProductSchema = z.object({
   main_image: z.string(),
   gallery_images: z.array(z.string()),
   category: z.string(),
+  position: z.coerce.number().int().positive,
 });
 
 export const updateProductSchema = createProductSchema
