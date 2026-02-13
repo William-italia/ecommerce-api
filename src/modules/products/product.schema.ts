@@ -1,8 +1,8 @@
-import { positive, z } from "zod";
+import { z } from 'zod';
 
 // params
 export const recommendQuerySchema = z.object({
-  exclude: z.coerce.number().int().positive().default(0),
+  currentProductId: z.coerce.number().int().positive().default(0),
   limit: z.coerce.number().int().positive().default(3),
 });
 
@@ -32,12 +32,12 @@ export const productResponseSchema = z.object({
   category: z.string(),
 });
 
-export const RecommendedProductResponseSchema = z.object({
+export const recommendedProductResponseSchema = z.object({
   id: z.coerce.number().int().positive(),
   name: z.string(),
 });
 
-export const CategoryProductResponseSchema = z.object({
+export const categoryProductResponseSchema = z.object({
   id: z.coerce.number().int().positive(),
   name: z.string(),
   description: z.string(),
@@ -59,6 +59,6 @@ export const createProductSchema = z.object({
 
 export const updateProductSchema = createProductSchema
   .partial()
-  .refine((data) => Object.keys(data).length > 0, {
-    message: "Envie ao menos um campo para atualizar",
+  .refine(data => Object.keys(data).length > 0, {
+    message: 'Envie ao menos um campo para atualizar',
   });

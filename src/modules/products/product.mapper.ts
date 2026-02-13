@@ -5,7 +5,7 @@ import {
 } from './product.types';
 
 export class ProductMapper {
-  static toDTO(row: any): ProductDTO {
+  static toProductDTO(row: any): ProductDTO {
     return {
       id: Number(row.id),
       name: row.name,
@@ -23,8 +23,8 @@ export class ProductMapper {
     };
   }
 
-  static toDTOList(rows: any[]): ProductDTO[] {
-    return rows.map(this.toDTO);
+  static toProductDTOList(rows: any[]): ProductDTO[] {
+    return rows.map(this.toProductDTO);
   }
 
   static toRecommendDTO(row: any): RecommendedProductDTO {

@@ -6,7 +6,11 @@ import {
   createProductSchema,
   updateProductSchema,
   recommendQuerySchema,
+  productResponseSchema,
+  recommendedProductResponseSchema,
+  categoryProductResponseSchema,
 } from './product.schema';
+import { sendResponse } from '../../shared/utils/sendResponse';
 import { handleError } from '../../shared/errors/handleError';
 
 export class ProductController {
@@ -14,9 +18,9 @@ export class ProductController {
 
   getProducts = async (req: Request, res: Response) => {
     try {
-      const products = await this.service.listProducts();
+      const data = await this.service.listProducts();
 
-      res.status(200).json({ products });
+      return sendResponse(res, productResponseSchema.array(), data);
     } catch (error: unknown) {
       return handleError(res, error);
     }
@@ -25,9 +29,9 @@ export class ProductController {
   getProduct = async (req: Request, res: Response) => {
     try {
       const { id } = productIdParamSchema.parse(req.params);
-      const product = await this.service.getProduct(id);
+      const data = await this.service.getProductById(id);
 
-      return res.status(200).json({ product });
+      return sendResponse(res, productResponseSchema, data);
     } catch (error: unknown) {
       return handleError(res, error);
     }
@@ -35,13 +39,14 @@ export class ProductController {
 
   getRecommendedProducts = async (req: Request, res: Response) => {
     try {
-      const { exclude, limit } = recommendQuerySchema.parse(req.query);
-      const products = await this.service.listRecommendedProducts(
-        exclude,
+      const { currentProductId, limit } = recommendQuerySchema.parse(req.query);
+
+      const data = await this.service.getRecommendedProducts(
+        currentProductId,
         limit
       );
 
-      return res.status(200).json({ products });
+      return sendResponse(res, recommendedProductResponseSchema.array(), data);
     } catch (error: unknown) {
       return handleError(res, error);
     }
@@ -51,9 +56,9 @@ export class ProductController {
     try {
       const { category } = productCategoryParamSchema.parse(req.params);
 
-      const products = await this.service.listProductsByCategory(category);
+      const data = await this.service.getProductsByCategory(category);
 
-      return res.status(200).json({ category: category, products });
+      return sendResponse(res, categoryProductResponseSchema.array(), data);
     } catch (error: unknown) {
       return handleError(res, error);
     }
@@ -64,7 +69,7 @@ export class ProductController {
       const data = createProductSchema.parse(req.body);
       const product = await this.service.createProduct(data);
 
-      return res.status(201).json({ product });
+      return sendResponse(res, productResponseSchema, product, 201);
     } catch (error) {
       return handleError(res, error);
     }
@@ -77,9 +82,7 @@ export class ProductController {
 
       const product = await this.service.updateProduct(id, data);
 
-      return res
-        .status(200)
-        .json({ message: 'Produto atualizado com sucesso', product });
+      return sendResponse(res, productResponseSchema, product);
     } catch (error: unknown) {
       return handleError(res, error);
     }
@@ -88,11 +91,9 @@ export class ProductController {
   removeProduct = async (req: Request, res: Response) => {
     try {
       const { id } = productIdParamSchema.parse(req.params);
-      const product = await this.service.removeProduct(id);
+      const data = await this.service.deleteProduct(id);
 
-      return res
-        .status(200)
-        .json({ message: 'Produto excluido com sucesso', product });
+      return sendResponse(res, productResponseSchema, data, 204);
     } catch (error: unknown) {
       return handleError(res, error);
     }

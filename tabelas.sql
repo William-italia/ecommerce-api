@@ -27,7 +27,9 @@ CREATE TABLE customers (
 CREATE TABLE cart (
     id SERIAL PRIMARY KEY,
     product_id INT NOT NULL REFERENCES products(id) ON DELETE CASCADE,
-    quantity INT NOT NULL DEFAULT 1
+    price NUMERIC(10,2) NOT NULL,
+    quantity INT NOT NULL DEFAULT 1,
+    subtotal
 );
 
 -- INVOICES

@@ -1,5 +1,5 @@
-import { pool } from "../../config/db";
-import { z } from "zod";
+import { pool } from '../../config/db';
+import { z } from 'zod';
 
 import {
   ProductDTO,
@@ -7,75 +7,59 @@ import {
   CategoryProductDTO,
   CreateProductDTO,
   UpdateProductDTO,
-} from "./product.types";
+} from './product.types';
 
-import {
-  CategoryProductResponseSchema,
-  productResponseSchema,
-  RecommendedProductResponseSchema,
-} from "./product.schema";
-
-import { ProductMapper } from "./product.mapper";
+import { ProductMapper } from './product.mapper';
 
 export class ProductRepository {
   //
-  async getAllProducts(): Promise<ProductDTO[]> {
-    const result = await pool.query("SELECT * FROM products");
+  async findAll(): Promise<ProductDTO[]> {
+    const result = await pool.query(
+      'SELECT id, name, description, features, box_items, price, stock, main_image, gallery_images, category, position FROM products'
+    );
 
-    return result.rows.map((row) => productResponseSchema.parse(row));
+    return ProductMapper.toProductDTOList(result.rows);
   }
   //
-  async getProductById(id: number): Promise<ProductDTO | null> {
-    const result = await pool.query("SELECT * FROM products WHERE id = $1", [
-      id,
-    ]);
+  async findById(id: number): Promise<ProductDTO | null> {
+    const result = await pool.query(
+      'SELECT id, name, description, features, box_items, price, stock, main_image, gallery_images, category, position FROM products WHERE id = $1',
+      [id]
+    );
 
     if (result.rowCount === 0) return null;
 
-    return productResponseSchema.parse(ProductMapper.toDTO(result.rows[0]));
+    return ProductMapper.toProductDTO(result.rows[0]);
   }
 
-  async existsByName(name: string): Promise<boolean | null> {
+  async findByCategory(category: string): Promise<CategoryProductDTO[]> {
     const result = await pool.query(
-      "SELECT name FROM products WHERE name = $1",
-      [name],
-    );
-
-    return result.rowCount !== null && result.rowCount > 0;
-  }
-
-  async getProductsByCategory(category: string): Promise<CategoryProductDTO[]> {
-    const result = await pool.query(
-      "SELECT id, name, description, main_image FROM products WHERE category = $1 ORDER BY position ASC",
-      [category],
+      'SELECT id, name, description, main_image FROM products WHERE category = $1 ORDER BY position ASC',
+      [category]
     );
 
     if (result.rowCount === 0) return [];
 
-    return result.rows.map((row) =>
-      CategoryProductResponseSchema.parse(ProductMapper.toCategoryDTO(row)),
-    );
+    return ProductMapper.toCategoryDTOList(result.rows);
   }
 
-  async getRecommendedProducts(
+  async findRecommended(
     exclude: number,
-    limit: number,
+    limit: number
   ): Promise<RecommendedProductDTO[]> {
     const result = await pool.query(
-      "SELECT id, name FROM products WHERE id != $1 ORDER BY RANDOM() LIMIT $2",
-      [exclude, limit],
+      'SELECT id, name FROM products WHERE id != $1 ORDER BY position DESC LIMIT $2',
+      [exclude, limit]
     );
 
     if (result.rowCount === 0) return [];
 
-    return result.rows.map((row) =>
-      RecommendedProductResponseSchema.parse(ProductMapper.toCategoryDTO(row)),
-    );
+    return ProductMapper.toRecommendedDTOList(result.rows);
   }
 
-  async createProduct(data: CreateProductDTO): Promise<ProductDTO> {
+  async create(data: CreateProductDTO): Promise<ProductDTO> {
     const result = await pool.query(
-      "INSERT INTO products(name, description, features, box_items, price, stock, main_image, gallery_images, category, position) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10) RETURNING *",
+      'INSERT INTO products(name, description, features, box_items, price, stock, main_image, gallery_images, category, position) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10) RETURNING *',
       [
         data.name,
         data.description,
@@ -87,15 +71,12 @@ export class ProductRepository {
         JSON.stringify(data.gallery_images),
         data.category,
         data.position,
-      ],
+      ]
     );
-    return productResponseSchema.parse(ProductMapper.toDTO(result.rows[0]));
+    return ProductMapper.toProductDTO(result.rows[0]);
   }
 
-  async updateProductById(
-    id: number,
-    data: UpdateProductDTO,
-  ): Promise<ProductDTO | null> {
+  async update(id: number, data: UpdateProductDTO): Promise<ProductDTO | null> {
     const fields: string[] = [];
     const values: unknown[] = [];
 
@@ -147,7 +128,7 @@ export class ProductRepository {
 
     const query = `
       UPDATE products
-      SET ${fields.join(", ")}
+      SET ${fields.join(', ')}
       WHERE id = $${idx}
       RETURNING *
     `;
@@ -156,17 +137,40 @@ export class ProductRepository {
 
     if (result.rowCount === 0) return null;
 
-    return productResponseSchema.parse(ProductMapper.toDTO(result.rows[0]));
+    return ProductMapper.toProductDTO(result.rows[0]);
   }
 
-  async deleteProductById(id: number): Promise<ProductDTO | null> {
+  async delete(id: number): Promise<ProductDTO | null> {
     const result = await pool.query(
-      "DELETE FROM products WHERE id=$1 RETURNING *",
-      [id],
+      'DELETE FROM products WHERE id=$1 RETURNING *',
+      [id]
     );
 
     if (result.rowCount === 0) return null;
 
-    return productResponseSchema.parse(ProductMapper.toDTO(result.rows[0]));
+    return ProductMapper.toProductDTO(result.rows[0]);
+  }
+
+  async findByName(name: string): Promise<boolean> {
+    const result = await pool.query(
+      'SELECT name FROM products WHERE name = $1',
+      [name]
+    );
+
+    return (result.rowCount as any) > 0;
+  }
+
+  async existsByName(name: string, excludeId?: number): Promise<boolean> {
+    let query = 'SELECT name FROM products WHERE name = $1 AND id != $2';
+    const values: (string | number)[] = [name];
+
+    if (excludeId !== undefined) {
+      query += ' AND id != $2';
+      values.push(excludeId);
+    }
+
+    const result = await pool.query(query, values);
+
+    return (result.rowCount as any) > 0;
   }
 }

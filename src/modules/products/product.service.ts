@@ -12,48 +12,50 @@ export class ProductService {
   constructor(private repo: ProductRepository) {}
 
   async listProducts(): Promise<ProductDTO[]> {
-    return this.repo.getAllProducts();
+    return this.repo.findAll();
   }
 
-  async listProductsByCategory(
-    category: string
-  ): Promise<CategoryProductDTO[] | null> {
-    const products = await this.repo.getProductsByCategory(category);
-
-    if (products.length === 0)
-      throw AppError.notFound(
-        'Não há nenhum produto nesta categoria: ' + category
-      );
-
-    return products;
-  }
-
-  async listRecommendedProducts(
-    id: number,
-    limit: number
-  ): Promise<RecommendedProductDTO[] | null> {
-    const products = await this.repo.getRecommendedProducts(id, limit);
-
-    if (products.length === 0)
-      throw AppError.notFound('Não foi possivel encontrar nenhum produto');
-
-    return products;
-  }
-
-  async getProduct(id: number): Promise<ProductDTO> {
-    const product = await this.repo.getProductById(id);
+  async getProductById(id: number): Promise<ProductDTO> {
+    const product = await this.repo.findById(id);
 
     if (!product) throw AppError.notFound('Produto não encontrado');
 
     return product;
   }
 
+  async getProductsByCategory(category: string): Promise<CategoryProductDTO[]> {
+    const products = await this.repo.findByCategory(category);
+
+    if (products.length === 0) return [];
+
+    return products;
+  }
+
+  async getRecommendedProducts(
+    currentProductId: number,
+    limit = 3
+  ): Promise<RecommendedProductDTO[]> {
+    if (limit <= 0 || limit >= 20) throw AppError.badRequest('Limite inválido');
+
+    if (currentProductId) {
+      const product = await this.repo.findById(currentProductId);
+
+      if (!product) throw AppError.notFound('Produto não encontrado');
+    }
+
+    const products = await this.repo.findRecommended(currentProductId, limit);
+
+    if (products.length === 0) return [];
+
+    return products;
+  }
+
   async createProduct(data: CreateProductDTO): Promise<ProductDTO> {
-    if (await this.repo.existsByName(data.name)) {
+    if (await this.repo.findByName(data.name)) {
       throw AppError.conflict('Já existe um produto com esse nome');
     }
 
-    const product = await this.repo.createProduct(data);
+    const product = await this.repo.create(data);
     return product;
   }
 
@@ -61,23 +63,26 @@ export class ProductService {
     id: number,
     data: UpdateProductDTO
   ): Promise<ProductDTO | null> {
-    // pensar mais
-    const existing = await this.repo.getProductById(id);
+    if (data.name !== undefined) {
+      const exists = await this.repo.existsByName(data.name, id);
 
-    if (!existing) throw AppError.notFound('Produto não encontrado');
+      if (exists) {
+        throw AppError.conflict('Nome já existe na base de dados!');
+      }
+    }
 
-    const updatedProduct = await this.repo.updateProductById(id, data);
+    const updated = await this.repo.update(id, data);
 
-    return updatedProduct;
+    if (!updated) throw AppError.notFound('Produto não encontrado');
+
+    return updated;
   }
 
-  async removeProduct(id: number) {
-    const existing = await this.repo.getProductById(id);
+  async deleteProduct(id: number) {
+    const deleted = await this.repo.delete(id);
 
-    if (!existing) throw AppError.notFound('Produto não encontrado');
+    if (!deleted) throw AppError.notFound('Produto não encontrado');
 
-    const product = await this.repo.deleteProductById(id);
-
-    return product;
+    return deleted;
   }
 }

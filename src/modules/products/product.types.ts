@@ -3,15 +3,14 @@ import {
   productResponseSchema,
   createProductSchema,
   updateProductSchema,
-  RecommendedProductResponseSchema,
-  CategoryProductResponseSchema,
+  recommendedProductResponseSchema,
+  categoryProductResponseSchema,
 } from './product.schema';
 
 export type ProductDTO = z.infer<typeof productResponseSchema>;
 export type CreateProductDTO = z.infer<typeof createProductSchema>;
 export type UpdateProductDTO = z.infer<typeof updateProductSchema>;
 export type RecommendedProductDTO = z.infer<
-  typeof RecommendedProductResponseSchema
+  typeof recommendedProductResponseSchema
 >;
-
-export type CategoryProductDTO = z.infer<typeof CategoryProductResponseSchema>;
+export type CategoryProductDTO = z.infer<typeof categoryProductResponseSchema>;
