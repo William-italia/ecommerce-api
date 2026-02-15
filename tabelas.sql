@@ -15,44 +15,85 @@ CREATE TABLE products (
 );
 
 
--- CUSTOMERS
-CREATE TABLE customers (
-    id SERIAL PRIMARY KEY,
-    name VARCHAR(255) NOT NULL,
-    email VARCHAR(255) UNIQUE NOT NULL,
-    phone_number VARCHAR(20)
-);
-
 -- CART
 CREATE TABLE cart (
-    id SERIAL PRIMARY KEY,
-    product_id INT NOT NULL REFERENCES products(id) ON DELETE CASCADE,
-    price NUMERIC(10,2) NOT NULL,
-    quantity INT NOT NULL DEFAULT 1,
-    subtotal
+id
+token (uuid)
+created_at
+updated_at
 );
 
--- INVOICES
-CREATE TABLE invoices (
+cart_items {
+id
+cart_id (fk)
+product_id (fk)
+quantity
+unit_price
+}
+
+orders {
+id
+customer_name
+customer_email
+customer_phone
+amount
+freight
+status
+created_at
+}
+
+order_items {
+id
+order_id (fk)
+product_id (fk)
+quantity
+unit_price
+}
+
+CREATE TABLE order_addresses (
     id SERIAL PRIMARY KEY,
-    customer_id INT NOT NULL REFERENCES customers(id) ON DELETE CASCADE,
-    amount DECIMAL(10,2) NOT NULL, -- total
-    freight DECIMAL NOT NULL, -- Frete
-    accessToken TEXT UNIQUE NOT NULL,
-        address VARCHAR(255),
-    postal_code VARCHAR(20),
+    order_id INTEGER UNIQUE REFERENCES orders(id) ON DELETE CASCADE,
+    address VARCHAR(255) NOT NULL,
+    number VARCHAR(20),
+    complement VARCHAR(255),
+    neighborhood VARCHAR(100),
     city VARCHAR(100),
-    country VARCHAR(100),
-    status VARCHAR(50) DEFAULT 'pending',
-    payment_id VARCHAR(255),
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+    state VARCHAR(100),
+    postal_code VARCHAR(20),
+    country VARCHAR(100)
 );
 
--- INVOICE ITEMS
-CREATE TABLE invoice_items (
+
+
+
+
+CREATE TABLE orders (
     id SERIAL PRIMARY KEY,
-    invoice_id INT NOT NULL REFERENCES invoices(id) ON DELETE CASCADE,
-    product_id INT NOT NULL REFERENCES products(id) ON DELETE CASCADE,
-    quantity INT NOT NULL DEFAULT 1,
-    price DECIMAL(10,2) NOT NULL
+
+    -- Cliente
+    customer_name VARCHAR(255) NOT NULL,
+    customer_email VARCHAR(255) NOT NULL,
+    customer_phone VARCHAR(20),
+
+    -- Endereço de entrega
+    address VARCHAR(255) NOT NULL,
+    number VARCHAR(20),
+    complement VARCHAR(255),
+    neighborhood VARCHAR(100),
+    city VARCHAR(100) NOT NULL,
+    state VARCHAR(100) NOT NULL,
+    postal_code VARCHAR(20) NOT NULL,
+    country VARCHAR(100) NOT NULL,
+
+    -- Valores
+    subtotal DECIMAL(10,2) NOT NULL,
+    freight DECIMAL(10,2) NOT NULL DEFAULT 0,
+    total DECIMAL(10,2) NOT NULL,
+
+    status VARCHAR(50) NOT NULL DEFAULT 'pending',
+    access_token TEXT UNIQUE NOT NULL,
+    payment_id VARCHAR(255),
+
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
