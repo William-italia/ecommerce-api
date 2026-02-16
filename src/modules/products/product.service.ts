@@ -1,4 +1,4 @@
-import { ProductRepository } from './product.repository';
+import { IProductRepository } from './product.repository.interface';
 import {
   ProductDTO,
   CreateProductDTO,
@@ -9,7 +9,7 @@ import {
 import { AppError } from '../../shared/errors/AppError';
 
 export class ProductService {
-  constructor(private repo: ProductRepository) {}
+  constructor(private repo: IProductRepository) {}
 
   async listProducts(): Promise<ProductDTO[]> {
     return this.repo.findAll();

@@ -1,5 +1,4 @@
 import { pool } from '../../config/db';
-import { z } from 'zod';
 
 import {
   ProductDTO,
@@ -10,8 +9,9 @@ import {
 } from './product.types';
 
 import { ProductMapper } from './product.mapper';
+import { IProductRepository } from './product.repository.interface';
 
-export class ProductRepository {
+export class ProductRepository implements IProductRepository {
   //
   async findAll(): Promise<ProductDTO[]> {
     const result = await pool.query(
@@ -161,7 +161,7 @@ export class ProductRepository {
   }
 
   async existsByName(name: string, excludeId?: number): Promise<boolean> {
-    let query = 'SELECT name FROM products WHERE name = $1 AND id != $2';
+    let query = 'SELECT name FROM products WHERE name = $1';
     const values: (string | number)[] = [name];
 
     if (excludeId !== undefined) {

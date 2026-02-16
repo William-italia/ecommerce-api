@@ -16,7 +16,7 @@ CREATE TABLE products (
 
 
 -- CART
-CREATE TABLE cart (
+CREATE TABLE carts (
 id
 token (uuid)
 created_at
