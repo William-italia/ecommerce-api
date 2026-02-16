@@ -1,4 +1,4 @@
-import { z } from 'zod';
+import { z } from "zod";
 
 // params
 export const recommendQuerySchema = z.object({
@@ -59,6 +59,6 @@ export const createProductSchema = z.object({
 
 export const updateProductSchema = createProductSchema
   .partial()
-  .refine(data => Object.keys(data).length > 0, {
-    message: 'Envie ao menos um campo para atualizar',
+  .refine((data) => Object.keys(data).length > 0, {
+    message: "Envie ao menos um campo para atualizar",
   });
