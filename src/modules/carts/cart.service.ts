@@ -1,5 +1,5 @@
-import { ICartItemRepository } from './cartItem.repository.interface';
-import { ICartRepository } from './cart.repository.interface';
+import { ICartItemRepository } from "./cartItem.repository.interface";
+import { ICartRepository } from "./cart.repository.interface";
 
 import {
   CartDTO,
@@ -11,24 +11,42 @@ import {
   UpdateCartItemDTO,
   CreateOrderDTO,
   CreateOrderItemDTO,
-} from './cart.types';
+} from "./cart.types";
 
-import { AppError } from '../../shared/errors/AppError';
+import { AppError } from "../../shared/errors/AppError";
+import { randomUUID } from "node:crypto";
+import { IProductRepository } from "../products/product.repository.interface";
 
 export class CartService {
   constructor(
     private cartRepo: ICartRepository,
-    private cartItemRepo: ICartItemRepository
+    private cartItemRepo: ICartItemRepository,
+    private productRepo: IProductRepository,
   ) {}
 
   async listCarts(): Promise<CartDTO[]> {
     return this.cartRepo.findAll();
   }
 
-  async createCart(data: CreateCartDTO): Promise<CartDTO> {
+  async addCart(data: CreateCartItemDTO, token: string): Promise<CartItemDTO> {
+    let cart = await this.cartRepo.findByToken(token);
 
-    const item =
+    if (!cart) {
+      const newToken = randomUUID();
+      cart = await this.cartRepo.createCart({ cart_token: newToken });
+    }
 
+    const product = await this.productRepo.findById(data.product_id);
 
+    if (!product) throw AppError.notFound("Produto não existe!");
+
+    const item = await this.cartItemRepo.createItem({
+      cart_id: cart.id,
+      product_id: product.id,
+      quantity: data.quantity,
+      unit_price: product.price,
+    });
+
+    return item;
   }
 }

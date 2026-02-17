@@ -2,13 +2,13 @@ import {
   CartItemDTO,
   CreateCartItemDTO,
   UpdateCartItemDTO,
-} from './cart.types';
+} from "./cart.types";
 
 export interface ICartItemRepository {
-  createItem(data: CreateCartItemDTO): Promise<CreateCartItemDTO>;
+  createItem(data: CartItemDTO): Promise<CartItemDTO>;
   findItemByID(productId: number): Promise<CartItemDTO | null>;
   updateCartItemQuantity(
     itemId: number,
-    data: UpdateCartItemDTO
+    data: UpdateCartItemDTO,
   ): Promise<CartItemDTO | null>;
 }
