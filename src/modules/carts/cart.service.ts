@@ -24,4 +24,11 @@ export class CartService {
   async listCarts(): Promise<CartDTO[]> {
     return this.cartRepo.findAll();
   }
+
+  async createCart(data: CreateCartDTO): Promise<CartDTO> {
+
+    const item =
+
+
+  }
 }
