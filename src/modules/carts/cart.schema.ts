@@ -1,9 +1,8 @@
-import { positive, z } from "zod";
+import { positive, z } from 'zod';
 
 //PARAMS
 
 // CART
-
 export const createCartSchema = z.object({
   cart_token: z.string(),
 });
@@ -14,11 +13,14 @@ export const cartResponseSchema = z.object({
 });
 
 export const createCartItemSchema = z.object({
+  cart_id: z.coerce.number().int().positive(),
   product_id: z.coerce.number().int().positive(),
   quantity: z.coerce.number().positive().min(0).max(8),
+  unit_price: z.coerce.number().min(0),
 });
 
 export const cartItemResponseSchema = z.object({
+  id: z.coerce.number().int().positive(),
   cart_id: z.coerce.number().int().positive(),
   product_id: z.coerce.number().int().positive(),
   quantity: z.coerce.number().int().positive(),

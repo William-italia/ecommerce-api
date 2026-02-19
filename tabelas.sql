@@ -17,19 +17,34 @@ CREATE TABLE products (
 
 -- CART
 CREATE TABLE carts (
-id
-token (uuid)
-created_at
-updated_at
+    id SERIAL PRIMARY KEY,
+    token UUID NOT NULL UNIQUE,
+    created_at TIMESTAMP NOT NULL DEFAULT NOW(),
+    updated_at TIMESTAMP NOT NULL DEFAULT NOW()
 );
 
-cart_items {
-id
-cart_id (fk)
-product_id (fk)
-quantity
-unit_price
-}
+
+CREATE TABLE cart_items (
+    id SERIAL PRIMARY KEY,
+    cart_id INTEGER NOT NULL,
+    product_id INTEGER NOT NULL,
+    quantity INTEGER NOT NULL CHECK (quantity > 0),
+    unit_price NUMERIC(10,2) NOT NULL CHECK (unit_price >= 0),
+
+    CONSTRAINT fk_cart
+        FOREIGN KEY (cart_id)
+        REFERENCES carts(id)
+        ON DELETE CASCADE,
+
+    CONSTRAINT fk_product
+        FOREIGN KEY (product_id)
+        REFERENCES products(id)
+        ON DELETE RESTRICT,
+
+    CONSTRAINT unique_product_per_cart
+        UNIQUE (cart_id, product_id)
+);
+
 
 orders {
 id
