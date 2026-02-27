@@ -6,26 +6,47 @@ import { sendResponse } from '../../shared/utils/sendResponse';
 export class CartController {
   constructor(private service: CartService) {}
 
-  async getCart(req: Request, res: Response) {
+  createCart = async (req: Request, res: Response) => {
     try {
-      const { token } = req.cookies?.cart_token;
+      const cart = await this.service.createCart();
 
-      const cart = await this.service.getCartWithItems(token);
+      res.cookie('cartToken', cart.token, {
+        httpOnly: true,
+        secure: false,
+        sameSite: 'lax',
+        maxAge: 1000 * 60 * 60 * 24 * 7,
+      });
+
+      return res.status(201).json(cart);
+    } catch (error: unknown) {
+      console.log('Deu ruim mano', error);
+    }
+  };
+
+  getCart = async (req: Request, res: Response) => {
+    try {
+      const token = req.cookies.cartToken;
+
+      const cart = await this.service.getCart(token);
 
       return res.status(200).json(cart);
-    } catch (error: unknown) {}
-  }
+    } catch (error: unknown) {
+      console.log('Deu ruim', error);
+    }
+  };
 
-  async addItem(req: Request, res: Response) {
+  addItem = async (req: Request, res: Response) => {
     try {
-      const token = req.cookies?.cart_token;
+      const token = req.cookies.cartToken;
+
+      console.log(token);
 
       const { item, newToken } = await this.service.addCart(req.body, token);
 
       if (newToken) {
-        res.cookie('cart_token', newToken, {
+        res.cookie('cartToken', newToken, {
           httpOnly: true,
-          secure: true,
+          secure: false,
           sameSite: 'lax',
           maxAge: 1000 * 60 * 60 * 24 * 7,
         });
@@ -33,7 +54,7 @@ export class CartController {
 
       return res.status(201).json(item);
     } catch (error: unknown) {
-      return handleError(res, error);
+      console.log(error);
     }
-  }
+  };
 }

@@ -1,26 +1,49 @@
-import { z } from "zod";
+import { z } from 'zod';
 
 import {
-  createCartSchema,
-  createCartItemSchema,
-  cartResponseSchema,
+  createCartItemBodySchema,
   cartItemResponseSchema,
-  createOrderSchema,
-  createOrderItemSchema,
-  orderResponseSchema,
-  updateCartItemSchema,
-  orderItemResponse,
-} from "./cart.schema";
+  createCartBodySchema,
+  cartResponseSchema,
+} from './cart.schema';
 
-export type CartDTO = z.infer<typeof cartResponseSchema>;
-export type CreateCartDTO = z.infer<typeof createCartSchema>;
+export type CreateCartBodyDTO = z.infer<typeof createCartBodySchema>;
 
-export type CartItemDTO = z.infer<typeof cartItemResponseSchema>;
-export type CreateCartItemDTO = z.infer<typeof createCartItemSchema>;
-export type UpdateCartItemDTO = z.infer<typeof updateCartItemSchema>;
+export type CartResponseDTO = z.infer<typeof cartResponseSchema>;
 
-export type OrderDTO = z.infer<typeof orderResponseSchema>;
-export type CreateOrderDTO = z.infer<typeof createOrderSchema>;
+export type CreateCartItemBodyDTO = z.infer<typeof createCartItemBodySchema>;
 
-export type OrderItemDTO = z.infer<typeof orderItemResponse>;
-export type CreateOrderItemDTO = z.infer<typeof createOrderItemSchema>;
+export type CartItemResponseDTO = z.infer<typeof cartItemResponseSchema>;
+
+export type CreateCartItemRepoDTO = {
+  cart_id: number;
+  product_id: number;
+  quantity: number;
+  unit_price: number;
+};
+
+export type UpdateCartItemRepoDTO = {
+  quantity: number;
+};
+
+export type CartItemWithProductRow = {
+  cart_item_id: number;
+  product_id: number;
+  quantity: number;
+  unit_price: number;
+  product_id_ref: number;
+  name: string;
+  main_image: string;
+};
+
+export type CartItemWithProductDTO = {
+  id: number;
+  product_id: number;
+  quantity: number;
+  unit_price: number;
+  product: {
+    id: number;
+    name: string;
+    main_image: string;
+  };
+};

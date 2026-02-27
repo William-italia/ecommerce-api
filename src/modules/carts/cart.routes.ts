@@ -17,10 +17,8 @@ const cartService = new CartService(
 
 const cartController = new CartController(cartService);
 
-router.get('/:id', cartController.getCart);
-router.get('', get);
-router.post('', create);
-router.put('', update);
-router.delete('', remove);
+router.get('/', cartController.getCart);
+router.post('/', cartController.addItem);
+// router.post('/', cartController.addItem);
 
 export default router;

@@ -1,18 +1,22 @@
 import {
-  CartItemDTO,
-  CreateCartItemDTO,
-  UpdateCartItemDTO,
+  CreateCartItemBodyDTO,
+  CartItemResponseDTO,
+  CreateCartItemRepoDTO,
+  UpdateCartItemRepoDTO,
 } from './cart.types';
 
 export interface ICartItemRepository {
-  createItem(data: CreateCartItemDTO): Promise<CreateCartItemDTO>;
+  createItem(data: CreateCartItemRepoDTO): Promise<CartItemResponseDTO>;
   findCartItemByID(
     productId: number,
     cartId: number
-  ): Promise<CartItemDTO | null>;
+  ): Promise<CartItemResponseDTO | null>;
   updateCartItemQuantity(
     itemId: number,
-    data: UpdateCartItemDTO
-  ): Promise<CartItemDTO | null>;
-  findItemsByCartId(cartId: number): Promise<CartItemDTO[] | null>;
+    quantity: number
+  ): Promise<CartItemResponseDTO | null>;
+  findItemsByCartId(cartId: number): Promise<CartItemResponseDTO[] | null>;
+  deleteItemsAll(cartId: number): Promise<boolean>;
+  deleteById(itemId: number): Promise<CartItemResponseDTO | null>;
+  getSubtotal(cartId: number): Promise<number>;
 }

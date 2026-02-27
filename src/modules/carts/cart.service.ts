@@ -2,15 +2,12 @@ import { ICartItemRepository } from './cartItem.repository.interface';
 import { ICartRepository } from './cart.repository.interface';
 
 import {
-  CartDTO,
-  CartItemDTO,
-  OrderDTO,
-  OrderItemDTO,
-  CreateCartDTO,
-  CreateCartItemDTO,
-  UpdateCartItemDTO,
-  CreateOrderDTO,
-  CreateOrderItemDTO,
+  CreateCartItemBodyDTO,
+  CartItemResponseDTO,
+  CreateCartItemRepoDTO,
+  UpdateCartItemRepoDTO,
+  CreateCartBodyDTO,
+  CartResponseDTO,
 } from './cart.types';
 
 import { AppError } from '../../shared/errors/AppError';
@@ -24,23 +21,39 @@ export class CartService {
     private productRepo: IProductRepository
   ) {}
 
-  async getCartWithItems(token: string): Promise<CartItemDTO[] | null> {
-    const cartId = await this.cartRepo.findByToken(token);
+  createCart = async (): Promise<CartResponseDTO> => {
+    const token = randomUUID();
+    const cart = await this.cartRepo.createCart({ cart_token: token });
 
-    if (!cartId) throw AppError.notFound('Carrinho não encontrado!');
+    return {
+      ...cart,
+      id: cart.id,
+      token: cart.token,
+    };
+  };
 
-    const items = await this.cartItemRepo.findItemsByCartId(cartId.id);
+  getCart = async (token: string): Promise<any> => {
+    const cart = await this.cartRepo.findByToken(token);
 
-    if (!items)
-      throw AppError.notFound('Nenhum item encontrado nesse carrinho');
+    if (!cart) throw AppError.notFound('Carrinho Não Foi Encontrado!');
 
-    return items;
-  }
+    const items = (await this.cartItemRepo.findItemsByCartId(cart.id)) || [];
+    const subtotal = (await this.cartItemRepo.getSubtotal(cart.id)) || 0;
+    const IVA = Number(subtotal.toFixed(2)) * 0.2;
+    const frete = subtotal > 0 ? 50 : 0;
 
-  async addCart(
-    data: CreateCartItemDTO,
+    return {
+      items: items,
+      subtotal,
+      IVA,
+      frete,
+    };
+  };
+
+  addCart = async (
+    data: CreateCartItemBodyDTO,
     token?: string
-  ): Promise<{ item: CreateCartItemDTO; newToken?: string }> {
+  ): Promise<{ item: CartItemResponseDTO; newToken?: string }> => {
     let cart = null;
     let newToken: string | undefined;
 
@@ -54,22 +67,20 @@ export class CartService {
     }
 
     const product = await this.productRepo.findById(data.product_id);
+
     if (!product) throw AppError.notFound('Produto não existe!');
 
     const existed = await this.cartItemRepo.findCartItemByID(
-      cart.id,
-      data.product_id
+      data.product_id,
+      cart.id
     );
 
+    console.log(existed);
+
     if (existed) {
-      const quantity = existed.quantity + data.quantity;
-
-      if (!existed.id)
-        throw AppError.notFound('Não achamos nenhum item existente');
-
       const update = await this.cartItemRepo.updateCartItemQuantity(
         existed.id,
-        { quantity }
+        data.quantity
       );
 
       if (!update) throw AppError.notFound('Erro ao atualizar item');
@@ -85,9 +96,5 @@ export class CartService {
     });
 
     return { item, newToken };
-  }
-
-  // lista produtos do carrinho + total que dá o carrinho
-  // remove produto do carrinho (no caso com quantity se for < 1 é pra remover do carrinhop)
-  // remove all (apaga todos os items do carrinho porem o cart em si continua existindo entt nn precisa de um token novo)
+  };
 }

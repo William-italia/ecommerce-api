@@ -1,7 +1,15 @@
-import { CartDTO, CreateCartDTO } from "./cart.types";
+import {
+  CreateCartItemBodyDTO,
+  CartItemResponseDTO,
+  CreateCartItemRepoDTO,
+  UpdateCartItemRepoDTO,
+  CartResponseDTO,
+  CreateCartBodyDTO,
+} from './cart.types';
 
 export interface ICartRepository {
-  findByToken(token: string): Promise<CartDTO | null>;
-  findAll(): Promise<CartDTO[]>;
-  createCart(data: CreateCartDTO): Promise<CartDTO>;
+  findCarts(): Promise<CartResponseDTO[]>;
+  deleteCart(token: string): Promise<CartResponseDTO | null>;
+  createCart(data: CreateCartBodyDTO): Promise<CartResponseDTO>;
+  findByToken(token: string): Promise<CartResponseDTO | null>;
 }
