@@ -19,7 +19,7 @@ export class CartController {
 
       return res.status(201).json(cart);
     } catch (error: unknown) {
-      console.log('Deu ruim mano', error);
+      handleError(res, error);
     }
   };
 
@@ -31,15 +31,13 @@ export class CartController {
 
       return res.status(200).json(cart);
     } catch (error: unknown) {
-      console.log('Deu ruim', error);
+      handleError(res, error);
     }
   };
 
   addItem = async (req: Request, res: Response) => {
     try {
       const token = req.cookies.cartToken;
-
-      console.log(token);
 
       const { item, newToken } = await this.service.addCart(req.body, token);
 
@@ -54,7 +52,7 @@ export class CartController {
 
       return res.status(201).json(item);
     } catch (error: unknown) {
-      console.log(error);
+      handleError(res, error);
     }
   };
 }

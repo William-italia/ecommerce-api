@@ -2,7 +2,6 @@ import {
   CreateCartItemBodyDTO,
   CartItemResponseDTO,
   CreateCartItemRepoDTO,
-  UpdateCartItemRepoDTO,
 } from './cart.types';
 
 export interface ICartItemRepository {

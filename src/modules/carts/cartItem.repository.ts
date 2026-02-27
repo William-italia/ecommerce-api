@@ -30,12 +30,12 @@ export class CartItemRepository implements ICartItemRepository {
   }
 
   async updateCartItemQuantity(
-    productId: number,
+    cartItemId: number,
     quantity: number
   ): Promise<CartItemResponseDTO | null> {
     const update = await pool.query(
-      'UPDATE cart_items CI SET quantity=$1  FROM carts C WHERE CI.id = $2 AND CI.cart_id = C.id RETURNING CI.*',
-      [quantity, productId]
+      'UPDATE cart_items SET quantity = $1 WHERE id = $2 RETURNING *',
+      [quantity, cartItemId]
     );
 
     if (update.rowCount === 0) return null;
@@ -50,8 +50,6 @@ export class CartItemRepository implements ICartItemRepository {
       'SELECT ci.id as cart_item_id, ci.product_id, ci.quantity, ci.unit_price, p.id as product_id_ref, p.name, p.main_image FROM cart_items ci JOIN products p ON p.id = ci.product_id WHERE ci.cart_id = $1 ',
       [cartId]
     );
-
-    if (Items.rowCount === 0) return null;
 
     return Items.rows;
   }

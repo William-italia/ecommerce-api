@@ -19,6 +19,5 @@ const cartController = new CartController(cartService);
 
 router.get('/', cartController.getCart);
 router.post('/', cartController.addItem);
-// router.post('/', cartController.addItem);
 
 export default router;

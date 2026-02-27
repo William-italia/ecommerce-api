@@ -15,15 +15,19 @@ export type CreateCartItemBodyDTO = z.infer<typeof createCartItemBodySchema>;
 
 export type CartItemResponseDTO = z.infer<typeof cartItemResponseSchema>;
 
+export type CartDetailsDTO = {
+  items: CartItemResponseDTO[];
+  totalItems: number;
+  subtotal: number;
+  IVA: number;
+  frete: number;
+};
+
 export type CreateCartItemRepoDTO = {
   cart_id: number;
   product_id: number;
   quantity: number;
   unit_price: number;
-};
-
-export type UpdateCartItemRepoDTO = {
-  quantity: number;
 };
 
 export type CartItemWithProductRow = {
